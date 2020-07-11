@@ -6,6 +6,8 @@ use DateInterval;
 
 interface CredentialsProvider
 {
+    public function getDSN(): string;
+
     public function getUsername(): string;
 
     public function getPassword(): string;

@@ -2,23 +2,111 @@
 
 namespace CEmerson\PDOSafe\CredentialsProviders;
 
-use CEmerson\PDOSafe\CredentialsProvider;
+use Aws\Exception\AwsException;
+use Aws\SecretsManager\SecretsManagerClient;
+use CEmerson\PDOSafe\Exceptions\ErrorFetchingCredentials;
 use DateInterval;
 
-final class AWSSecretsManagerCredentialsProvider implements CredentialsProvider
+class AWSSecretsManagerCredentialsProvider extends AbstractCredentialsProvider
 {
+    /** @var SecretsManagerClient */
+    private $secretsManagerClient;
+
+    /** @var string */
+    private $credentialsName;
+
+    /** @var string */
+    private $charset;
+
+    /** @var DateInterval */
+    private $expiresAfter;
+
+    private $credentials = null;
+
+    public function __construct(SecretsManagerClient $secretsManagerClient, string $credentialsName, string $charset = 'utf8', ?DateInterval $expiresAfter = null)
+    {
+        $this->secretsManagerClient = $secretsManagerClient;
+        $this->credentialsName = $credentialsName;
+        $this->charset = $charset;
+        $this->expiresAfter = $expiresAfter;
+    }
+
+    public function getDSN(): string
+    {
+        $this->fetchCredentials();
+
+        return $this->getDSNString(
+            $this->credentials->engine,
+            $this->credentials->host,
+            $this->credentials->dbname,
+            $this->charset,
+            (int) $this->credentials->port
+        );
+    }
+
     public function getUsername(): string
     {
-        // TODO: Implement getUsername() method.
+        $this->fetchCredentials();
+
+        return $this->credentials->username;
     }
 
     public function getPassword(): string
     {
-        // TODO: Implement getPassword() method.
+        $this->fetchCredentials();
+
+        return $this->credentials->password;
     }
 
     public function getCacheExpiresAfter(): ?DateInterval
     {
-        // TODO: Implement getCacheExpiresAfter() method.
+        return $this->expiresAfter;
+    }
+
+    private function fetchCredentials(): void
+    {
+        if (is_null($this->credentials)) {
+            try {
+                $result = $this->secretsManagerClient->getSecretValue([
+                    'SecretId' => $this->credentialsName
+                ]);
+            } catch (AwsException $awsException) {
+                $error = $awsException->getAwsErrorCode();
+
+                $errorMessage = '';
+
+                switch ($error) {
+                    case 'DecryptionFailureException':
+                        $errorMessage = ": Secrets Manager can't decrypt the protected secret text using the provided AWS KMS key.";
+                        break;
+
+                    case 'InternalServiceErrorException':
+                        $errorMessage = ": An error occurred on the server side.";
+                        break;
+
+                    case 'InvalidParameterException':
+                        $errorMessage = ": You provided an invalid value for a parameter.";
+                        break;
+
+                    case 'InvalidRequestException':
+                        $errorMessage = ": You provided a parameter value that is not valid for the current state of the resource.";
+                        break;
+
+                    case 'ResourceNotFoundException':
+                        $errorMessage = ": We can't find the resource that you asked for.";
+                        break;
+                }
+
+                throw new ErrorFetchingCredentials($error . $errorMessage,0, $awsException);
+            }
+
+            if (isset($result['SecretString'])) {
+                $secret = $result['SecretString'];
+            } else {
+                $secret = base64_decode($result['SecretBinary']);
+            }
+
+            $this->credentials = json_decode($secret);
+        }
     }
 }

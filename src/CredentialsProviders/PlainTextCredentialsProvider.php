@@ -2,21 +2,29 @@
 
 namespace CEmerson\PDOSafe\CredentialsProviders;
 
-use CEmerson\PDOSafe\CredentialsProvider;
 use DateInterval;
 
-final class PlainTextCredentialsProvider implements CredentialsProvider
+class PlainTextCredentialsProvider extends AbstractCredentialsProvider
 {
+    /** @var string */
+    private $DSN;
+
     /** @var string */
     private $username;
 
     /** @var string */
     private $password;
 
-    public function __construct(string $username, string $password)
+    public function __construct(string $DSN, string $username, string $password)
     {
+        $this->DSN = $DSN;
         $this->username = $username;
         $this->password = $password;
+    }
+
+    public function getDSN(): string
+    {
+        return $this->DSN;
     }
 
     public function getUsername(): string
