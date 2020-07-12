@@ -7,6 +7,9 @@ use DateInterval;
 class PlainTextCredentialsProvider extends AbstractCredentialsProvider
 {
     /** @var string */
+    private $DBIdentifier;
+
+    /** @var string */
     private $DSN;
 
     /** @var string */
@@ -15,11 +18,17 @@ class PlainTextCredentialsProvider extends AbstractCredentialsProvider
     /** @var string */
     private $password;
 
-    public function __construct(string $DSN, string $username, string $password)
+    public function __construct(string $DBIdentifier, string $DSN, string $username, string $password)
     {
+        $this->DBIdentifier = $DBIdentifier;
         $this->DSN = $DSN;
         $this->username = $username;
         $this->password = $password;
+    }
+
+    public function getDBIdentifier(): string
+    {
+        return $this->DBIdentifier;
     }
 
     public function getDSN(): string

@@ -11,6 +11,9 @@ use DateInterval;
 
 class AWSSSMParameterStoreCredentialsProvider extends AbstractCredentialsProvider
 {
+    /** @var string */
+    private $DBIdentifier;
+
     /** @var SsmClient */
     private $ssmClient;
 
@@ -36,12 +39,14 @@ class AWSSSMParameterStoreCredentialsProvider extends AbstractCredentialsProvide
     private $password = null;
 
     public function __construct(
+        string $DBIdentifier,
         SsmClient $ssmClient,
         ?string $DSNParameterName = null,
         ?string $usernameParameterName = null,
         ?string $passwordParameterName = null,
         ?DateInterval $expiresAfter = null
     ) {
+        $this->DBIdentifier = $DBIdentifier;
         $this->ssmClient = $ssmClient;
         $this->DSNParameterName = $DSNParameterName;
         $this->usernameParameterName = $usernameParameterName;
@@ -62,6 +67,11 @@ class AWSSSMParameterStoreCredentialsProvider extends AbstractCredentialsProvide
     public function setPlainTextPassword(string $password): void
     {
         $this->password = $password;
+    }
+
+    public function getDBIdentifier(): string
+    {
+        return $this->DBIdentifier;
     }
 
     public function getDSN(): string
@@ -127,15 +137,21 @@ class AWSSSMParameterStoreCredentialsProvider extends AbstractCredentialsProvide
     private function guardAgainstMissingCredentials()
     {
         if (is_null($this->DSN) && is_null($this->DSNParameterName)) {
-            throw new MissingCredential("You must specify the parameter name for the DSN or specify a plain text DSN with setPlainTextDSN()");
+            throw new MissingCredential(
+                "You must specify the parameter name for the DSN or specify a plain text DSN with setPlainTextDSN()"
+            );
         }
 
         if (is_null($this->username) && is_null($this->usernameParameterName)) {
-            throw new MissingCredential("You must specify the parameter name for the username or specify a plain text username with setPlainTextUsername()");
+            throw new MissingCredential(
+                "You must specify the parameter name for the username or specify a plain text username with setPlainTextUsername()"
+            );
         }
 
         if (is_null($this->password) && is_null($this->passwordParameterName)) {
-            throw new MissingCredential("You must specify the parameter name for the password or specify a plain text password with setPlainTextPassword()");
+            throw new MissingCredential(
+                "You must specify the parameter name for the password or specify a plain text password with setPlainTextPassword()"
+            );
         }
     }
 

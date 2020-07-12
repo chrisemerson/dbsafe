@@ -24,17 +24,75 @@ final class PDOSafeFactory
         $this->logger = $logger ?? new NullLogger();
     }
 
-    public function getPDO(CredentialsProvider $credentialsProvider, array $options): PDO
+    public function getPDO(CredentialsProvider $credentialsProvider, array $options, $forceFetch = false): PDO
     {
-        try {
-            return new PDO(
-                $credentialsProvider->getDSN(),
-                $credentialsProvider->getUsername(),
-                $credentialsProvider->getPassword(),
-                $options
-            );
-        } catch (PDOException $e) {
-            throw $e;
+        while (true) {
+            try {
+                $pdo = new PDO(
+                    $this->getDSN($credentialsProvider, $forceFetch),
+                    $this->getUsername($credentialsProvider, $forceFetch),
+                    $this->getPassword($credentialsProvider, $forceFetch),
+                    $options
+                );
+
+                $this->cache->commit();
+
+                return $pdo;
+            } catch (PDOException $e) {
+                if ($forceFetch) {
+                    throw $e;
+                }
+
+                $forceFetch = true;
+            }
         }
+    }
+
+    private function getDSN(CredentialsProvider $credentialsProvider, $force = false)
+    {
+        return $this->getCachedItem(
+            $credentialsProvider,
+            'getDSN',
+            "cemerson.pdosafe." . $credentialsProvider->getDBIdentifier() . ".dsn",
+            $force
+        );
+    }
+
+    private function getUsername(CredentialsProvider $credentialsProvider, $force = false)
+    {
+        return $this->getCachedItem(
+            $credentialsProvider,
+            'getUsername',
+            "cemerson.pdosafe." . $credentialsProvider->getDBIdentifier() . ".username",
+            $force
+        );
+    }
+
+    private function getPassword(CredentialsProvider $credentialsProvider, $force = false)
+    {
+        return $this->getCachedItem(
+            $credentialsProvider,
+            'getPassword',
+            "cemerson.pdosafe." . $credentialsProvider->getDBIdentifier() . ".password",
+            $force
+        );
+    }
+
+    private function getCachedItem(CredentialsProvider $credentialsProvider, string $methodName, string $cacheKey, bool $forceFetch = false)
+    {
+        $cachedItem = $this->cache->getItem($cacheKey);
+
+        if ($cachedItem->isHit() && !$forceFetch) {
+            $value = $cachedItem->get();
+        } else {
+            $value = $credentialsProvider->$methodName();
+
+            $cachedItem->set($value);
+            $cachedItem->expiresAfter($credentialsProvider->getCacheExpiresAfter());
+
+            $this->cache->saveDeferred($cachedItem);
+        }
+
+        return $value;
     }
 }

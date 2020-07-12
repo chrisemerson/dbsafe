@@ -9,6 +9,9 @@ use DateInterval;
 
 class AWSSecretsManagerCredentialsProvider extends AbstractCredentialsProvider
 {
+    /** @var string */
+    private $DBIdentifier;
+
     /** @var SecretsManagerClient */
     private $secretsManagerClient;
 
@@ -23,12 +26,23 @@ class AWSSecretsManagerCredentialsProvider extends AbstractCredentialsProvider
 
     private $credentials = null;
 
-    public function __construct(SecretsManagerClient $secretsManagerClient, string $credentialsName, string $charset = 'utf8', ?DateInterval $expiresAfter = null)
-    {
+    public function __construct(
+        string $DBIdentifier,
+        SecretsManagerClient $secretsManagerClient,
+        string $credentialsName,
+        string $charset = 'utf8',
+        ?DateInterval $expiresAfter = null
+    ) {
+        $this->DBIdentifier = $DBIdentifier;
         $this->secretsManagerClient = $secretsManagerClient;
         $this->credentialsName = $credentialsName;
         $this->charset = $charset;
         $this->expiresAfter = $expiresAfter;
+    }
+
+    public function getDBIdentifier(): string
+    {
+        return $this->DBIdentifier;
     }
 
     public function getDSN(): string
@@ -77,7 +91,8 @@ class AWSSecretsManagerCredentialsProvider extends AbstractCredentialsProvider
 
                 switch ($error) {
                     case 'DecryptionFailureException':
-                        $errorMessage = ": Secrets Manager can't decrypt the protected secret text using the provided AWS KMS key.";
+                        $errorMessage =
+                            ": Secrets Manager can't decrypt the protected secret text using the provided AWS KMS key.";
                         break;
 
                     case 'InternalServiceErrorException':
@@ -89,7 +104,8 @@ class AWSSecretsManagerCredentialsProvider extends AbstractCredentialsProvider
                         break;
 
                     case 'InvalidRequestException':
-                        $errorMessage = ": You provided a parameter value that is not valid for the current state of the resource.";
+                        $errorMessage =
+                            ": You provided a parameter value that is not valid for the current state of the resource.";
                         break;
 
                     case 'ResourceNotFoundException':
