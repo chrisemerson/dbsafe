@@ -24,6 +24,8 @@ class PlainTextCredentialsProvider extends AbstractCredentialsProvider
         $this->DSN = $DSN;
         $this->username = $username;
         $this->password = $password;
+
+        parent::__construct();
     }
 
     public function getDBIdentifier(): string

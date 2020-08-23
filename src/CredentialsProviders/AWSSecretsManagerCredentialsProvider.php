@@ -38,6 +38,8 @@ class AWSSecretsManagerCredentialsProvider extends AbstractCredentialsProvider
         $this->credentialsName = $credentialsName;
         $this->charset = $charset;
         $this->expiresAfter = $expiresAfter;
+
+        parent::__construct();
     }
 
     public function getDBIdentifier(): string
@@ -81,6 +83,8 @@ class AWSSecretsManagerCredentialsProvider extends AbstractCredentialsProvider
     {
         if (is_null($this->credentials)) {
             try {
+                $this->logger->debug("Attempting to call Secrets Manager for credentials");
+
                 $result = $this->secretsManagerClient->getSecretValue([
                     'SecretId' => $this->credentialsName
                 ]);
@@ -113,8 +117,12 @@ class AWSSecretsManagerCredentialsProvider extends AbstractCredentialsProvider
                         break;
                 }
 
+                $this->logger->error($error . $errorMessage);
+
                 throw new ErrorFetchingCredentials($error . $errorMessage,0, $awsException);
             }
+
+            $this->logger->debug("Success fetching credentials - extracting from results object");
 
             if (isset($result['SecretString'])) {
                 $secret = $result['SecretString'];
@@ -123,6 +131,8 @@ class AWSSecretsManagerCredentialsProvider extends AbstractCredentialsProvider
             }
 
             $this->credentials = json_decode($secret);
+        } else {
+            $this->logger->debug("Credentials already fetched - skipping fetch instruction");
         }
     }
 }

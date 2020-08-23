@@ -3,8 +3,9 @@
 namespace CEmerson\PDOSafe;
 
 use DateInterval;
+use Psr\Log\LoggerAwareInterface;
 
-interface CredentialsProvider
+interface CredentialsProvider extends LoggerAwareInterface
 {
     /** A unique identifier for the database that this CredentialsProvider represents, for use with caching */
     public function getDBIdentifier(): string;

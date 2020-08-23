@@ -3,10 +3,19 @@
 namespace CEmerson\PDOSafe\CredentialsProviders;
 
 use CEmerson\PDOSafe\CredentialsProvider;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\NullLogger;
 
 abstract class AbstractCredentialsProvider implements CredentialsProvider
 {
+    use LoggerAwareTrait;
+
     private const MYSQL_DEFAULT_PORT = 3306;
+
+    public function __construct()
+    {
+        $this->logger = new NullLogger();
+    }
 
     protected function getDSNString(
         string $engine,

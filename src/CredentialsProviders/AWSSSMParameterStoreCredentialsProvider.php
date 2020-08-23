@@ -52,6 +52,8 @@ class AWSSSMParameterStoreCredentialsProvider extends AbstractCredentialsProvide
         $this->usernameParameterName = $usernameParameterName;
         $this->passwordParameterName = $passwordParameterName;
         $this->expiresAfter = $expiresAfter;
+
+        parent::__construct();
     }
 
     public function setPlainTextDSN(string $DSN): void
@@ -113,12 +115,23 @@ class AWSSSMParameterStoreCredentialsProvider extends AbstractCredentialsProvide
                     'WithDecryption' => true
                 ]);
             } catch (AwsException $awsException) {
+                $this->logger->error(
+                    "AWS Exception "
+                    . $awsException->getAwsErrorCode()
+                    . ": " . $awsException->getAwsErrorMessage()
+                );
+
+                $this->logger->error("Error fetching credentials. AWS Error code: " . $awsException->getAwsErrorCode());
                 throw new ErrorFetchingCredentials($awsException->getAwsErrorCode(),0, $awsException);
             }
 
             if (count($result['InvalidParameters']) > 0) {
+                $errorMessage = "Credentials not found in AWS Parameter store: " . implode(', ', $result['InvalidParameters']);
+
+                $this->logger->error($errorMessage);
+
                 throw new CredentialsNotFound(
-                    "Credentials not found in AWS Parameter store: " . implode(', ', $result['InvalidParameters']),
+                    $errorMessage,
                     0,
                     null,
                     $result['InvalidParameters']
@@ -137,22 +150,25 @@ class AWSSSMParameterStoreCredentialsProvider extends AbstractCredentialsProvide
     private function guardAgainstMissingCredentials()
     {
         if (is_null($this->DSN) && is_null($this->DSNParameterName)) {
-            throw new MissingCredential(
-                "You must specify the parameter name for the DSN or specify a plain text DSN with setPlainTextDSN()"
-            );
+            $errorMessage = "You must specify the parameter name for the DSN or specify a plain text DSN with setPlainTextDSN()";
+
+            $this->logger->error($errorMessage);
+            throw new MissingCredential($errorMessage);
         }
 
         if (is_null($this->username) && is_null($this->usernameParameterName)) {
-            throw new MissingCredential(
-                "You must specify the parameter name for the username or specify a plain text username with setPlainTextUsername()"
-            );
+            $errorMessage = "You must specify the parameter name for the username or specify a plain text username with setPlainTextUsername()";
+
+            $this->logger->error($errorMessage);
+            throw new MissingCredential($errorMessage);
         }
 
         if (is_null($this->password) && is_null($this->passwordParameterName)) {
-            throw new MissingCredential(
-                "You must specify the parameter name for the password or specify a plain text password with setPlainTextPassword()"
-            );
-        }
+            $errorMessage = "You must specify the parameter name for the password or specify a plain text password with setPlainTextPassword()";
+
+            $this->logger->error($errorMessage);
+            throw new MissingCredential($errorMessage);
+       }
     }
 
     private function credentialsToFetch(): array
