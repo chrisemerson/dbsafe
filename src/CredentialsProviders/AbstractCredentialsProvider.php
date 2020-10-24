@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace CEmerson\PDOSafe\CredentialsProviders;
+namespace CEmerson\DBSafe\CredentialsProviders;
 
-use CEmerson\PDOSafe\CredentialsProvider;
+use CEmerson\DBSafe\CredentialsProvider;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 

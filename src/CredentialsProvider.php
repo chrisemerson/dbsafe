@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace CEmerson\PDOSafe;
+namespace CEmerson\DBSafe;
 
 use DateInterval;
 use Psr\Log\LoggerAwareInterface;

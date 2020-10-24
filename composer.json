@@ -1,6 +1,6 @@
 {
-    "name": "cemerson/pdosafe",
-    "description": "Library for using AWS Parameter Store or AWS Secrets Manager with PDO",
+    "name": "cemerson/dbsafe",
+    "description": "Library for using AWS Parameter Store or AWS Secrets Manager with database connections in PHP",
     "type": "library",
     "license": "MIT",
     "minimum-stability": "stable",
@@ -18,12 +18,12 @@
     },
     "autoload": {
         "psr-4": {
-            "CEmerson\\PDOSafe\\": "src"
+            "CEmerson\\DBSafe\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "CEmerson\\PDOSafe\\": "test"
+            "CEmerson\\DBSafe\\": "test"
         }
     },
     "config": {

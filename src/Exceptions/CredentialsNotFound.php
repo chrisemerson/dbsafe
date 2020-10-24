@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace CEmerson\PDOSafe\Exceptions;
+namespace CEmerson\DBSafe\Exceptions;
 
 use Throwable;
 
