@@ -65,7 +65,7 @@ final class DBSafe
         return $this->getCachedItem(
             $credentialsProvider,
             'getDSN',
-            "cemerson.dbsafe." . $credentialsProvider->getDBIdentifier() . ".dsn",
+            "cemerson.dbsafe." . md5($credentialsProvider->getDBIdentifier()) . ".dsn",
             $force
         );
     }
@@ -75,7 +75,7 @@ final class DBSafe
         return $this->getCachedItem(
             $credentialsProvider,
             'getUsername',
-            "cemerson.dbsafe." . $credentialsProvider->getDBIdentifier() . ".username",
+            "cemerson.dbsafe." . md5($credentialsProvider->getDBIdentifier()) . ".username",
             $force
         );
     }
@@ -85,7 +85,7 @@ final class DBSafe
         return $this->getCachedItem(
             $credentialsProvider,
             'getPassword',
-            "cemerson.dbsafe." . $credentialsProvider->getDBIdentifier() . ".password",
+            "cemerson.dbsafe." . md5($credentialsProvider->getDBIdentifier()) . ".password",
             $force
         );
     }
