@@ -6,5 +6,8 @@ use Psr\Log\LoggerAwareInterface;
 
 interface DBFactory extends LoggerAwareInterface
 {
-    public function getDB($dsn, $username = null, $passwd = null);
+    /** Returns the database connection, in whatever form that may be for this factory - resource, Object etc
+     *  This method MUST throw an IncorrectCredentials exception if the credentials are incorrect,
+     *  to allow DBSafe to re-fetch and try again */
+    public function getDB($dsn, $username = null, $password = null);
 }
