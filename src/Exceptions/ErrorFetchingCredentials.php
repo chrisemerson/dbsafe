@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace CEmerson\PDOSafe\Exceptions;
+namespace CEmerson\DBSafe\Exceptions;
 
-class ErrorFetchingCredentials extends PDOSafeException
+class ErrorFetchingCredentials extends DBSafeException
 {
 }

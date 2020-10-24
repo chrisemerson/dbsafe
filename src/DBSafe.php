@@ -1,17 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace CEmerson\PDOSafe;
+namespace CEmerson\DBSafe;
 
-use PDO;
-use PDOException;
+use Exception;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-final class PDOSafe
+final class DBSafe
 {
-    /** @var PDOFactory */
-    private $PDOFactory;
+    /** @var DBFactory */
+    private $DBFactory;
 
     /** @var CacheItemPoolInterface */
     private $cache;
@@ -20,38 +19,38 @@ final class PDOSafe
     private $logger;
 
     public function __construct(
-        PDOFactory $PDOFactory,
+        DBFactory $DBFactory,
         CacheItemPoolInterface $cache = null,
         LoggerInterface $logger = null
     ) {
-        $this->PDOFactory = $PDOFactory;
+        $this->DBFactory = $DBFactory;
         $this->cache = $cache;
         $this->logger = $logger ?? new NullLogger();
     }
 
-    public function getPDO(CredentialsProvider $credentialsProvider, array $options, $forceFetch = false): PDO
+    public function getDB(CredentialsProvider $credentialsProvider, array $options, $forceFetch = false)
     {
         $credentialsProvider->setLogger($this->logger);
 
         while (true) {
             try {
-                $this->logger->debug("Setting up PDO Object");
+                $this->logger->debug("Setting up DB Object");
 
-                $pdo = $this->PDOFactory->getPDO(
+                $db = $this->DBFactory->getDB(
                     $this->getDSN($credentialsProvider, $forceFetch),
                     $this->getUsername($credentialsProvider, $forceFetch),
                     $this->getPassword($credentialsProvider, $forceFetch),
                     $options
                 );
 
-                $this->logger->debug("PDO item created, committing cache to save values");
+                $this->logger->debug("DB item created, committing cache to save values");
 
                 $this->cache->commit();
 
                 $this->logger->debug("Cache committed");
 
-                return $pdo;
-            } catch (PDOException $e) {
+                return $db;
+            } catch (Exception $e) {
                 if ($forceFetch) {
                     throw $e;
                 }
@@ -66,7 +65,7 @@ final class PDOSafe
         return $this->getCachedItem(
             $credentialsProvider,
             'getDSN',
-            "cemerson.pdosafe." . $credentialsProvider->getDBIdentifier() . ".dsn",
+            "cemerson.dbsafe." . $credentialsProvider->getDBIdentifier() . ".dsn",
             $force
         );
     }
@@ -76,7 +75,7 @@ final class PDOSafe
         return $this->getCachedItem(
             $credentialsProvider,
             'getUsername',
-            "cemerson.pdosafe." . $credentialsProvider->getDBIdentifier() . ".username",
+            "cemerson.dbsafe." . $credentialsProvider->getDBIdentifier() . ".username",
             $force
         );
     }
@@ -86,7 +85,7 @@ final class PDOSafe
         return $this->getCachedItem(
             $credentialsProvider,
             'getPassword',
-            "cemerson.pdosafe." . $credentialsProvider->getDBIdentifier() . ".password",
+            "cemerson.dbsafe." . $credentialsProvider->getDBIdentifier() . ".password",
             $force
         );
     }

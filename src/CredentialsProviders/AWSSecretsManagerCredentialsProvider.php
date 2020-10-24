@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace CEmerson\PDOSafe\CredentialsProviders;
+namespace CEmerson\DBSafe\CredentialsProviders;
 
 use Aws\Exception\AwsException;
 use Aws\SecretsManager\SecretsManagerClient;
-use CEmerson\PDOSafe\Exceptions\ErrorFetchingCredentials;
+use CEmerson\DBSafe\Exceptions\ErrorFetchingCredentials;
 use DateInterval;
 
 class AWSSecretsManagerCredentialsProvider extends AbstractCredentialsProvider

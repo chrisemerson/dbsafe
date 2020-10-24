@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace CEmerson\PDOSafe\CredentialsProviders;
+namespace CEmerson\DBSafe\CredentialsProviders;
 
 use Aws\Exception\AwsException;
 use Aws\Ssm\SsmClient;
-use CEmerson\PDOSafe\Exceptions\CredentialsNotFound;
-use CEmerson\PDOSafe\Exceptions\ErrorFetchingCredentials;
-use CEmerson\PDOSafe\Exceptions\MissingCredential;
+use CEmerson\DBSafe\Exceptions\CredentialsNotFound;
+use CEmerson\DBSafe\Exceptions\ErrorFetchingCredentials;
+use CEmerson\DBSafe\Exceptions\MissingCredential;
 use DateInterval;
 
 class AWSSSMParameterStoreCredentialsProvider extends AbstractCredentialsProvider
