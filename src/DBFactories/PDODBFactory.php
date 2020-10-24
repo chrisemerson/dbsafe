@@ -8,7 +8,7 @@ use PDO;
 use PDOException;
 use Psr\Log\LoggerAwareTrait;
 
-final class PDOFactory implements DBFactory
+final class PDODBFactory implements DBFactory
 {
     use LoggerAwareTrait;
 
@@ -20,14 +20,14 @@ final class PDOFactory implements DBFactory
         $this->options = $options;
     }
 
-    public function getDB($dsn, $username = null, $passwd = null)
+    public function getDB($dsn, $username = null, $password = null)
     {
         try {
-            return new PDO($dsn, $username, $passwd, $this->options);
+            return new PDO($dsn, $username, $password, $this->options);
         } catch (PDOException $e) {
             $this->logger->info("PDO Exception thrown: " . get_class($e) . " " . $e->getMessage());
 
-            throw new IncorrectCredentials();
+            throw new IncorrectCredentials("Incorrect Credentials", 0, $e);
         }
     }
 }
