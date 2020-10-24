@@ -2,7 +2,9 @@
 
 namespace CEmerson\DBSafe;
 
-interface DBFactory
+use Psr\Log\LoggerAwareInterface;
+
+interface DBFactory extends LoggerAwareInterface
 {
-    public function getDB($dsn, $username = null, $passwd = null, $options = null);
+    public function getDB($dsn, $username = null, $passwd = null);
 }
