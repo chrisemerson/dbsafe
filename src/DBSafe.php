@@ -35,7 +35,7 @@ final class DBSafe
                 $db = $DBFactory->getDB(
                     $this->getDSN($credentialsProvider, $forceFetch),
                     $this->getUsername($credentialsProvider, $forceFetch),
-                    $this->getPassword($credentialsProvider, $forceFetch),
+                    $this->getPassword($credentialsProvider, $forceFetch)
                 );
 
                 $this->logger->debug("DB item created, committing cache to save values");
