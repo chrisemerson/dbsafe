@@ -8,7 +8,7 @@
         "php": "^7.1|^8.0",
         "aws/aws-sdk-php": "^3.145",
         "psr/cache": "^1.0",
-        "psr/log": "^1.1"
+        "psr/log": "^1.1|^2.0|^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.2",
